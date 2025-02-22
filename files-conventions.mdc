@@ -1,0 +1,33 @@
+---
+description: How to name files
+globs: *.ts, *.tsx
+---
+Rules to name files :
+
+## General
+
+* Always use kebab-kase
+
+## Server Actions
+
+* Always add a suffix of `.action`
+
+Example :
+
+* `user.ts` -> `user.action.ts`
+
+## Zustand store
+
+* Always add a suffix of `.store`
+
+Example :
+
+* `user.ts` -> `user.store.ts`
+
+## Schema
+
+* Always add a suffix of `.schema`
+
+Example :
+
+* `user.ts` -> `user.schema.ts`## Zustand store

@@ -1,0 +1,37 @@
+---
+description: Create and understand Client Components in NextJS 15 and React 19
+globs: *.tsx, *.ts
+---
+React 19: Separate Client and [server-components.mdc](mdc:.cursor/rules/server-components.mdc) 
+
+Client Components allow you to write interactive UI elements that are pre-rendered on the server and can use client-side JavaScript to run in the browser.
+
+## Why Client Components?
+
+1. **Interactivity**: Client Components can use state, effects, and event listeners, meaning they can provide immediate feedback to the user and update the UI dynamically.
+2. **Browser APIs**: Client Components have access to browser APIs, such as geolocation or localStorage, enabling richer functionality.
+
+## Example:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>Click me</button>
+    </div>
+  );
+}
+```
+
+## Rules:
+
+1. Client Components need to start with `'use client'`.
+2. Client Components can use `useState` and other React hooks.
+3. Client Componentsed** on the server, which means that they can create hydration errors. You must avoid such errors by using hooks like `@use-is-client.ts` or checking `typeof window` when using Browser APIs.

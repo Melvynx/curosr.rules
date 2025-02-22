@@ -1,0 +1,230 @@
+---
+description: Create and use React Query State to sync URL Query of the application with our Query State with NUQS
+globs: *.tsx, *.ts
+---
+NUQS is a libriarie that enable you to store value in the QUERY of the URL :
+
+* /users?page=12&q=hello&name=Melvyn
+
+The Query can be stored in a [client-components.mdc](mdc:.cursor/rules/client-components.mdc) with useQuery hooks : 
+
+```tsx
+'use client'
+ 
+import { useQueryState } from 'nuqs'
+ 
+export function Demo() {
+  const [name, setName] = useQueryState('name')
+  return (
+    <>
+      <input value={name || ''} onChange={e => setName(e.target.value)} />
+      <button onClick={() => setName(null)}>Clear</button>
+      <p>Hello, {name || 'anonymous visitor'}!</p>
+    </>
+  )
+}
+```
+
+You can parse the data with utility method :
+
+```tsx
+import { useQueryState, parseAsInteger } from 'nuqs'
+ 
+export default () => {
+  const [count, setCount] = useQueryState('count', parseAsInteger)
+  return (
+    <>
+      <pre>count: {count}</pre>
+      <button onClick={() => setCount(0)}>Reset</button>
+      {/* handling null values in setCount is annoying: */}
+      <button onClick={() => setCount(c => (c ?? 0) + 1)}>+</button>
+      <button onClick={() => setCount(c => (c ?? 0) - 1)}>-</button>
+      <button onClick={() => setCount(null)}>Clear</button>
+    </>
+  )
+}
+```
+
+Here are some other exemple :
+
+```tsx
+import { parseAsString } from 'nuqs'
+import { parseAsInteger } from 'nuqs'
+import { parseAsFloat } from 'nuqs'
+import { parseAsHex } from 'nuqs'
+import { parseAsIndex } from 'nuqs'
+import { parseAsBoolean } from 'nuqs'
+import { parseAsNumberLiteral } from 'nuqs'
+import { parseAsNumberLiteral } from 'nuqs'
+import { parseAsJson } from 'nuqs'
+
+ 
+// List accepted values
+const diceSides = [1, 2, 3, 4, 5, 6] as const
+ 
+// Then pass it to the parser
+parseAsNumberLiteral(diceSides)
+
+// List accepted values
+const sortOrder = ['asc', 'desc'] as const
+ 
+// Then pass it to the parser
+parseAsStringLiteral(sortOrder)
+
+
+const [search] = useQueryState('search', { defaultValue: '' })
+//      ^? string
+ 
+const [count] = useQueryState('count', parseAsInteger)
+//      ^? number | null -> no default value = nullable
+ 
+const [count] = useQueryState('count', parseAsInteger.withDefault(0))
+//      ^? number
+```
+
+### Options
+
+You can use option like that :
+
+```tsx
+const [state, setState] = useQueryState(
+  'foo',
+  parseAsString.withOptions({ history: 'push' })
+)
+```
+
+Here is the option :
+
+* history: By default, state updates are done by replacing the current history entry with the updated query when state changes.
+* shallow: By default, query state updates are done in a client-first manner: there are no network calls to the server. This is equivalent to the shallow option of the Next.js router set to true. To opt-in to notifying the server on query updates, you can set shallow to false.
+* scroll: The Next.js router scrolls to the top of the page on navigation updates, which may not be desirable when updating the query string with local state.
+* throttleMs: Because of browsers rate-limiting the History API, updates to the URL are queued and throttled to a default of 50ms, which seems to satisfy most browsers even when sending high-frequency query updates, like binding to a text input or a slider. Safari’s rate limits are much higher and require a throttle of 120ms (320ms for older versions of Safari). If you want to opt-in to a larger throttle time — for example to reduce the amount of requests sent to the server when paired with shallow: false — you can specify it under the throttleMs option:
+
+## Server-side
+
+NUQS also have integration of server-side usage.
+
+To parse search params server-side, you can use a loader function.
+
+You create one using the createLoader function, by passing it your search params descriptor object:
+
+```tsx
+import { parseAsFloat, createLoader } from 'nuqs/server'
+ 
+// Describe your search params, and reuse this in useQueryStates / createSerializer:
+export const coordinatesSearchParams = {
+  latitude: parseAsFloat.withDefault(0)
+  longitude: parseAsFloat.withDefault(0)
+}
+ 
+export const loadSearchParams = createLoader(coordinatesSearchParams)
+```
+
+Here, loadSearchParams is a function that parses search params and returns state variables to be consumed server-side (the same state type that useQueryStates returns).
+
+Then on [nextjs-routes.mdc](mdc:.cursor/rules/nextjs-routes.mdc) you can use :
+
+```tsx
+// page.tsx
+import { loadSearchParams } from './search-params'
+import type { SearchParams } from 'nuqs/server'
+import type { PageParams } from "@/types/next";
+ 
+ 
+export default async function Page(props: PageParams) {
+  const { latitude, longitude } = await loadSearchParams(props.searchParams)
+  return <Map
+    lat={latitude}
+    lng={longitude}
+  />
+ 
+  // Pro tip: you don't *have* to await the result.
+  // Pass the Promise object to children components wrapped in <Suspense>
+  // to benefit from PPR / dynamicIO and serve a static outer shell
+  // immediately, while streaming in the dynamic parts that depend on
+  // the search params when they become available.
+}
+```
+
+Only work in page, not in layout, because layout doesn't have searchParams.
+
+### Cache
+
+If you wish to access the searchParams in a deeply nested Server Component (ie: not in the Page component), you can use createSearchParamsCache to do so in a type-safe manner.
+
+```tsx
+import {
+  createSearchParamsCache,
+  parseAsInteger,
+  parseAsString
+} from 'nuqs/server'
+// Note: import from 'nuqs/server' to avoid the "use client" directive
+ 
+export const searchParamsCache = createSearchParamsCache({
+  // List your search param keys and associated parsers here:
+  q: parseAsString.withDefault(''),
+  maxResults: parseAsInteger.withDefault(10)
+})
+```
+
+Then in `page.tsx` :
+
+```tsx
+import { searchParamsCache } from './searchParams'
+import { type SearchParams } from 'nuqs/server'
+ 
+type PageProps = {
+  searchParams: Promise<SearchParams> // Next.js 15+: async searchParams prop
+}
+ 
+export default async function Page({ searchParams }: PageProps) {
+  // ⚠️ Don't forget to call `parse` here.
+  // You can access type-safe values from the returned object:
+  const { q: query } = await searchParamsCache.parse(searchParams)
+  return (
+    <div>
+      <h1>Search Results for {query}</h1>
+      <Results />
+    </div>
+  )
+}
+ 
+// anywhere in [server-components.mdc](mdc:.cursor/rules/server-components.mdc)
+function Results() {
+  // Access type-safe search params in children server components:
+  const maxResults = searchParamsCache.get('maxResults')
+  return <span>Showing up to {maxResults} results</span>
+}
+```
+
+## Tips
+
+### Reuse hooks
+
+If you find yourself reusing the same hooks in multiple components, you can create a custom hook to encapsulate the parser configuration.
+
+```ts
+'use client'
+ 
+import { useQueryStates, parseAsFloat } from 'nuqs'
+ 
+export function useCoordinates() {
+  return useQueryStates({
+    lat: parseAsFloat.withDefault(0),
+    lng: parseAsFloat.withDefault(0),
+  })
+}
+```
+
+## Rules
+
+* When you want use a query-state in a server component, you must add shallow and throttleMs
+
+Exemple :
+
+```tsx
+const [status, setStatus] = useQueryState("status", {
+  shallow: false,
+  throttleMs: 1000,
+});
+```
