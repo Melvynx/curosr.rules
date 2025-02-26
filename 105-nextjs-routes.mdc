@@ -1,10 +1,12 @@
 ---
-description: Create file that will be used by NextJS to handle the routing and handle error, loading, and more.
+description: EXPLAIN how to create and use routing file in NextJS
 globs: *.tsx
 ---
-NextJS App Directory come with totally different way of handling routing.
+## Context
 
-Every files in `App` will be included but only the follwing files will be used.
+* NextJS is a framework that handle route for us.
+* Here is exactly how to create and handle route in our application.
+* We can only handle route in `app` directory
 
 ## `page.tsx`
 

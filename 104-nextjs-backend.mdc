@@ -1,7 +1,11 @@
 ---
-description: NextJS available backend method
+description: EXPLAIN how NextJS 15 backend methods work.
 globs: *.ts, *.tsx
 ---
+## Context
+
+* NextJS 15 give us backend methods we should use.
+
 ## Header
 
 Enable you to get the header of the request.

@@ -2,6 +2,13 @@
 description: How write PostgresQL queries
 globs: *.sql
 ---
+## Context
+
+* We use Prisma with Postgres
+* Migration should be write in Postgres
+
+## Rules
+
 You must always write PostgresQL code when you are in `.sql` files.
 
 PostgresQL use quotes in the tables, here is a valid example :

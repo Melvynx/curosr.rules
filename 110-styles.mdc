@@ -1,6 +1,6 @@
 ---
-description: Styles used in our application
-globs: *.ts, *.tsx
+description: ENFORCE style in our application
+globs: **/*
 ---
 - Write concise, technical TypeScript code using functional and declarative programming patterns.
 - Avoid classes; prefer iteration and modularization over code duplication.

@@ -1,8 +1,8 @@
 ---
-description: How to refactor React Ref with the new version of React 19
+description: PLAN to refactor React 19 Ref
 globs: *.tsx
 ---
-<context>
+## Context
 React 19 is out and `forwardRef` is now longer needed to use `ref` in any React components. We can now just pass `ref` props :
 
 ```tsx
@@ -11,13 +11,13 @@ const MyButton = ({ ref, ...props }: ComponentProps<"button">) => {
 };
 ```
 
-</context>
+## Goal
 
-<goal>
 You need to refactor a component **that was using `forwardRef`** to use the new `ref` props.
-</goal>
 
-<example>
+
+## Example
+
 BEFORE :
 
 ```tsx
@@ -47,5 +47,3 @@ export const MyCustomComponent = ({
   return <div ref={ref} {...props} />;
 };
 ```
-
-</example>

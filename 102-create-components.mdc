@@ -1,8 +1,10 @@
 ---
-description: How to create a React Components (convention about my code)
+description: EXPLAIN how to create a component
 globs: *.tsx
 ---
-Here is how you need to create React Components
+## Context
+
+* Creating a component must ALWAYS follow this rules.
 
 ## Rules
 

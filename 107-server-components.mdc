@@ -2,6 +2,14 @@
 description: Create and understand Server Components in NextJS 15
 globs: *.tsx
 ---
+## Context
+
+* Since React 19 and NextJS 13 Server Component can be used.
+* Server Component enable use to make backend query directly on our Component
+* Server Component NEVER run on the client
+
+## Usage
+
 Utilize React 19 with Server Components. Implement Prisma queries and backend logic inside `page` or `layout` files like this:
 
 ```tsx
